@@ -1,15 +1,15 @@
-import TrackPlayer, { Capability, Event, State } from 'react-native-track-player'
+import TrackPlayer, { Capability, Event, RepeatMode, State } from 'react-native-track-player'
 import BackgroundTimer from 'react-native-background-timer'
 import { playMusic as handlePlayMusic } from './playList'
 // import { PlayerMusicInfo } from '@/store/modules/player/playInfo'
 
 
-export { useProgress } from './hook'
+export { useBufferProgress } from './hook'
 
 const emptyIdRxp = /\/\/default$/
 const tempIdRxp = /\/\/default$|\/\/default\/\/restorePlay$/
 export const isEmpty = (trackId = global.lx.playerTrackId) => {
-  console.log(trackId)
+  // console.log(trackId)
   return !trackId || emptyIdRxp.test(trackId)
 }
 export const isTempId = (trackId = global.lx.playerTrackId) => !trackId || tempIdRxp.test(trackId)
@@ -133,7 +133,7 @@ const playMusic = ((fn: (musicInfo: LX.Player.PlayMusic, url: string, time: numb
         _url = ''
         _time = 0
         isDelayRun = false
-        fn(musicInfo as LX.Player.PlayMusic, url, time)
+        fn(musicInfo!, url, time)
       }, delay)
     } else {
       isDelayRun = true
@@ -159,6 +159,8 @@ export const setStop = async() => {
   await TrackPlayer.stop()
   if (!isEmpty()) await TrackPlayer.skipToNext()
 }
+export const setLoop = async(loop: boolean) => TrackPlayer.setRepeatMode(loop ? RepeatMode.Off : RepeatMode.Track)
+
 export const setPause = async() => TrackPlayer.pause()
 // export const skipToNext = () => TrackPlayer.skipToNext()
 export const setCurrentTime = async(time: number) => TrackPlayer.seekTo(time)

@@ -1,20 +1,22 @@
-import React, { memo, useState, useMemo, useCallback } from 'react'
-import { View, Image } from 'react-native'
+import { memo, useState, useMemo, useCallback } from 'react'
+import { StyleSheet, View } from 'react-native'
 import { BorderWidths } from '@/theme'
 import { Icon } from '@/components/common/Icon'
 import { createStyle } from '@/utils/tools'
 import { useTheme } from '@/store/theme/hook'
 import { type Comment } from '../utils'
 import Text from '@/components/common/Text'
-import { scaleSizeH, scaleSizeW } from '@/utils/pixelRatio'
-import ScaledImage from '@/components/common/ScaledImage'
+import { scaleSizeW } from '@/utils/pixelRatio'
 import { useLayout } from '@/utils/hooks'
+import { useI18n } from '@/lang'
+import Image from '@/components/common/Image'
+import CommentImage from './CommentImage'
+import CommentText from './CommentText'
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const defaultUser = require('@/resources/images/defaultUser.jpg')
 
 const GAP = 12
 const avatarWidth = scaleSizeW(36)
-const MAX_IMAGE_HEIGHT = scaleSizeH(260)
 
 const CommentFloor = memo(({ comment, isLast }: {
   comment: Comment
@@ -23,6 +25,7 @@ const CommentFloor = memo(({ comment, isLast }: {
   const theme = useTheme()
   const [isAvatarError, setIsAvatarError] = useState(false)
   const { onLayout, width } = useLayout()
+  const t = useI18n()
 
   const handleAvatarError = useCallback(() => {
     setIsAvatarError(true)
@@ -60,11 +63,9 @@ const CommentFloor = memo(({ comment, isLast }: {
       <View style={styles.comment}>
         <View>
           <Image
-            source={comment.avatar && !isAvatarError ? { uri: comment.avatar } : defaultUser}
+            url={comment.avatar && !isAvatarError ? comment.avatar : defaultUser}
             onError={handleAvatarError}
-            progressiveRenderingEnabled={true}
-            borderRadius={4}
-            style={{ height: avatarWidth, width: avatarWidth }} />
+            style={stylesRaw.avatar} />
         </View>
         <View style={styles.right}>
           <View style={styles.info}>
@@ -74,18 +75,18 @@ const CommentFloor = memo(({ comment, isLast }: {
               </Text>
               <View style={styles.metaInfo}>
                 <Text numberOfLines={1} size={12} color={theme['c-450']}>{comment.timeStr}</Text>
-                { comment.location ? <Text numberOfLines={1} style={styles.location} size={12} color={theme['c-450']}>{comment.location}</Text> : null }
+                { comment.location ? <Text numberOfLines={1} style={styles.location} size={12} color={theme['c-450']}>{t('location', { location: comment.location })}</Text> : null }
               </View>
             </View>
             {likedCount}
           </View>
-          <Text selectable style={styles.text}>{comment.text}</Text>
+          <CommentText text={comment.text} />
           {
             comment.images?.length
               ? (
                   <View style={styles.images} onLayout={onLayout}>
                     {
-                      comment.images.map((url, index) => <ScaledImage key={String(index)} uri={url} maxWidth={width} maxHeight={MAX_IMAGE_HEIGHT} />)
+                      comment.images.map((url, index) => <CommentImage key={String(index)} url={url} maxWidth={width} />)
                     }
                   </View>
                 )
@@ -137,14 +138,6 @@ const styles = createStyle({
   likedCount: {
     marginLeft: 2,
   },
-  text: {
-    // textAlign: 'center',
-    marginTop: 5,
-    lineHeight: 19,
-    // paddingTop: 5,
-    // paddingBottom: 5,
-    // opacity: 0,
-  },
   images: {
     paddingTop: 5,
     width: '100%',
@@ -156,6 +149,14 @@ const styles = createStyle({
     borderTopWidth: BorderWidths.normal,
     // backgroundColor: 'rgba(0,0,0,0.1)',
     borderStyle: 'dashed',
+  },
+})
+
+const stylesRaw = StyleSheet.create({
+  avatar: {
+    height: avatarWidth,
+    width: avatarWidth,
+    borderRadius: 4,
   },
 })
 

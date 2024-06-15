@@ -1,12 +1,11 @@
-import React from 'react'
 import Content from './Content'
-import PlayerBar from '../components/PlayerBar'
+import PlayerBar from '@/components/player/PlayerBar'
 
 export default () => {
   return (
     <>
       <Content />
-      <PlayerBar />
+      <PlayerBar isHome />
     </>
   )
 }

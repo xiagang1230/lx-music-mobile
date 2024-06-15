@@ -5,15 +5,18 @@
  * width:375
  * height:667
  */
-import { Dimensions, PixelRatio } from 'react-native'
+import { PixelRatio } from 'react-native'
+import { windowSizeTools } from './windowSizeTools'
 
 // 高保真的宽度和高度
 const designWidth = 375.0
 const designHeight = 667.0
 
 // 获取屏幕的dp
-let screenW = Dimensions.get('window').width
-let screenH = Dimensions.get('window').height
+const size = windowSizeTools.getSize()
+// console.log('size', size)
+let screenW = size.width
+let screenH = size.height
 if (screenW > screenH) {
   const temp = screenW
   screenW = screenH
@@ -75,4 +78,18 @@ export function scaleSizeW(size: number) {
   let scaleWidth = size * scale
   size = Math.floor(scaleWidth / pixelRatio)
   return size * global.lx.fontSize
+}
+
+
+export const scaleSizeWR = (size: number) => {
+  return size * 2 - scaleSizeW(size)
+}
+
+export const scaleSizeHR = (size: number) => {
+  return size * 2 - scaleSizeH(size)
+}
+
+export const scaleSizeAbsHR = (size: number) => {
+  let scaleHeight = size * scale
+  return size * 2 - Math.floor(scaleHeight / pixelRatio)
 }

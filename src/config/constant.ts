@@ -2,6 +2,11 @@ export const HEADER_HEIGHT = 42
 export const LIST_ITEM_HEIGHT = 54
 export const LIST_SCROLL_POSITION_KEY = '__LIST_SCROLL_POSITION_KEY__'
 
+export const SPLIT_CHAR = {
+  DISLIKE_NAME: '@',
+  DISLIKE_NAME_ALIAS: '#',
+} as const
+
 export const LIST_IDS = {
   DEFAULT: 'default',
   LOVE: 'love',
@@ -25,7 +30,7 @@ export enum COMPONENT_IDS {
 export enum NAV_SHEAR_NATIVE_IDS {
   playDetail_pic = 'playDetail_pic',
   playDetail_header = 'playDetail_header',
-  playDetail_pageIndicator = 'playDetail_pageIndicator',
+  // playDetail_pageIndicator = 'playDetail_pageIndicator',
   playDetail_player = 'playDetail_player',
   songlistDetail_pic = 'songlistDetail_pic',
   songlistDetail_title = 'songlistDetail_title',
@@ -50,11 +55,15 @@ export const storageDataPrefix = {
   syncHost: '@sync_host',
   syncHostHistory: '@sync_host_history',
 
+  openStoragePath: '@open_storage_path',
+  selectedManagedFolder: '@selected_managed_folder',
   notificationTipEnable: '@notification_tip_enable',
+  ignoringBatteryOptimizationTipEnable: '@ignoring_battery_optimization_tip_enable',
 
   searchHistoryList: '@search_history_list',
   listUpdateInfo: '@list_update_info',
   ignoreVersion: '@ignore_version',
+  ignoreVersionFailTipTimeKey: '@ignore_version_fail_tip_time',
   leaderboardSetting: '@leaderboard_setting',
   songListSetting: '@songist_setting',
   searchSetting: '@search_setting',
@@ -62,6 +71,12 @@ export const storageDataPrefix = {
   fontSize: '@font_size',
 
   theme: '@theme',
+
+  cheatTip: '@cheat_tip',
+
+  dislikeList: '@dislike_list',
+
+  userApi: '@user_api__',
 } as const
 
 // v0.x.x 版本的 data keys
@@ -93,7 +108,8 @@ export const NAV_MENUS = [
 
 export type NAV_ID_Type = typeof NAV_MENUS[number]['id']
 
-export const LXM_FILE_EXT_RXP = /\.(json|lxmc)$/
+export const LXM_FILE_EXT_RXP = ['json', 'lxmc', 'bin']
+export const USER_API_SOURCE_FILE_EXT_RXP = ['js']
 
 export const MUSIC_TOGGLE_MODE = {
   listLoop: 'listLoop', // 列表循环
@@ -118,8 +134,8 @@ export const DEFAULT_SETTING = {
   },
 
   songList: {
-    source: 'kg' as LX.OnlineSource,
-    sortId: '5',
+    source: 'kw' as LX.OnlineSource,
+    sortId: 'new',
     tagName: '',
     tagId: '',
   },
@@ -135,24 +151,3 @@ export const DEFAULT_SETTING = {
     // query: {},
   },
 }
-
-export const SYNC_CODE = {
-  helloMsg: 'Hello~::^-^::~v3~',
-  idPrefix: 'OjppZDo6',
-  authMsg: 'lx-music auth::',
-  authFailed: 'Auth failed',
-  missingAuthCode: 'Missing auth code',
-  getServiceIdFailed: 'Get service id failed',
-  connectServiceFailed: 'Connect service failed',
-  connecting: 'Connecting...',
-  unknownServiceAddress: 'Unknown service address',
-  msgBlockedIp: 'Blocked IP',
-  msgConnect: 'lx-music connect',
-  msgAuthFailed: 'Auth failed',
-} as const
-
-export const SYNC_CLOSE_CODE = {
-  normal: 1000,
-  failed: 4100,
-} as const
-

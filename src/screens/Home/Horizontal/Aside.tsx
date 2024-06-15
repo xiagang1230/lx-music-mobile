@@ -1,6 +1,6 @@
-import React, { memo } from 'react'
-import { ScrollView, StatusBar, TouchableOpacity, View } from 'react-native'
-import { useNavActiveId } from '@/store/common/hook'
+import { memo } from 'react'
+import { ScrollView, TouchableOpacity, View } from 'react-native'
+import { useNavActiveId, useStatusbarHeight } from '@/store/common/hook'
 import { useTheme } from '@/store/theme/hook'
 import { Icon } from '@/components/common/Icon'
 import { confirmDialog, createStyle, exitApp as backHome } from '@/utils/tools'
@@ -65,8 +65,9 @@ const styles = createStyle({
 
 const Header = () => {
   const theme = useTheme()
+  const statusBarHeight = useStatusbarHeight()
   return (
-    <View style={{ paddingTop: StatusBar.currentHeight }}>
+    <View style={{ paddingTop: statusBarHeight }}>
       <View style={styles.header}>
         <Icon name="logo" color={theme['c-primary-dark-100-alpha-300']} size={22} />
         {/* <Text style={styles.headerText} size={16} color={theme['c-primary-dark-100-alpha-300']}>LX Music</Text> */}
@@ -115,7 +116,7 @@ export default memo(() => {
           confirmButtonText: global.i18n.t('list_remove_tip_button'),
         }).then(isExit => {
           if (!isExit) return
-          exitApp()
+          exitApp('Exit Btn')
         })
         return
       case 'back_home':

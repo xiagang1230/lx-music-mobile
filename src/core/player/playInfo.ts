@@ -10,6 +10,10 @@ export const setMusicInfo = (musicInfo: Partial<LX.Player.MusicInfo>) => {
   playerActions.setMusicInfo(musicInfo)
 }
 
+export const setLoadErrorPicUrl = (url: string) => {
+  playerActions.setLoadErrorPicUrl(url)
+}
+
 export const setPlayListId = (listId: string | null) => {
   playerActions.setPlayListId(listId)
 }
@@ -84,7 +88,7 @@ const setPlayerMusicInfo = (musicInfo: LX.Music.MusicInfo | LX.Download.ListItem
       pic: musicInfo.metadata.musicInfo.meta.picUrl,
       name: musicInfo.metadata.musicInfo.name,
       singer: musicInfo.metadata.musicInfo.singer,
-      album: musicInfo.metadata.musicInfo.meta.albumName,
+      album: musicInfo.metadata.musicInfo.meta.albumName ?? '',
       lrc: null,
       tlrc: null,
       rlrc: null,
@@ -95,7 +99,7 @@ const setPlayerMusicInfo = (musicInfo: LX.Music.MusicInfo | LX.Download.ListItem
       pic: musicInfo.meta.picUrl,
       name: musicInfo.name,
       singer: musicInfo.singer,
-      album: musicInfo.meta.albumName,
+      album: musicInfo.meta.albumName ?? '',
       lrc: null,
       tlrc: null,
       rlrc: null,

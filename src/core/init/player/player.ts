@@ -5,6 +5,7 @@ import { setStatusText, setIsPlay } from '@/core/player/playStatus'
 import { setStop } from '@/plugins/player'
 import { delayUpdateMusicInfo } from '@/plugins/player/playList'
 import playerState from '@/store/player/state'
+import settingState from '@/store/setting/state'
 
 
 export default async(setting: LX.AppSetting) => {
@@ -24,6 +25,7 @@ export default async(setting: LX.AppSetting) => {
     }
     // resetPlayerMusicInfo()
     // global.app_event.stop()
+    global.app_event.setProgress(0)
     setStatusText(global.i18n.t('player__end'))
     void playNext(true)
     // })
@@ -36,7 +38,8 @@ export default async(setting: LX.AppSetting) => {
   }
 
   const updatePic = () => {
-    if (playerState.playMusicInfo.musicInfo) {
+    if (!settingState.setting['player.isShowNotificationImage']) return
+    if (playerState.playMusicInfo.musicInfo && playerState.musicInfo.pic) {
       delayUpdateMusicInfo(playerState.musicInfo)
     }
   }

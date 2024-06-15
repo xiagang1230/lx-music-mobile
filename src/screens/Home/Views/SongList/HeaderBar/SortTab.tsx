@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { ScrollView, TouchableOpacity } from 'react-native'
 import songlistState, { type SortInfo, type Source } from '@/store/songlist/state'
 import { useI18n } from '@/lang'
@@ -26,7 +26,7 @@ export default forwardRef<SortTabType, SortTabProps>(({ onSortChange }, ref) => 
   useImperativeHandle(ref, () => ({
     setSource(source, activeTab) {
       scrollViewRef.current?.scrollTo({ x: 0 })
-      setSortList(songlistState.sortList[source] as SortInfo[])
+      setSortList(songlistState.sortList[source]!)
       setActiveId(activeTab)
     },
   }))

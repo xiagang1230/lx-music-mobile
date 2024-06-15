@@ -1,10 +1,9 @@
-import React from 'react'
 import { View, TouchableOpacity } from 'react-native'
 // import Button from '@/components/common/Button'
 // import { navigations } from '@/navigation'
 // import { BorderWidths } from '@/theme'
 import { useTheme } from '@/store/theme/hook'
-import { useNavActiveId } from '@/store/common/hook'
+import { useNavActiveId, useStatusbarHeight } from '@/store/common/hook'
 import { useI18n } from '@/lang'
 import { createStyle } from '@/utils/tools'
 import { Icon } from '@/components/common/Icon'
@@ -31,6 +30,7 @@ const LeftHeader = () => {
   const theme = useTheme()
   const id = useNavActiveId()
   const t = useI18n()
+  const statusBarHeight = useStatusbarHeight()
 
   const openMenu = () => {
     global.app_event.changeMenuVisible(true)
@@ -39,8 +39,8 @@ const LeftHeader = () => {
   return (
     <View style={{
       ...styles.container,
-      height: scaleSizeH(HEADER_HEIGHT) + StatusBar.currentHeight,
-      paddingTop: StatusBar.currentHeight,
+      height: scaleSizeH(HEADER_HEIGHT) + statusBarHeight,
+      paddingTop: statusBarHeight,
     }}>
       <View style={styles.left}>
         <TouchableOpacity style={styles.btn} onPress={openMenu}>
@@ -70,6 +70,7 @@ const RightHeader = () => {
   const theme = useTheme()
   const t = useI18n()
   const id = useNavActiveId()
+  const statusBarHeight = useStatusbarHeight()
 
   const openMenu = () => {
     global.app_event.changeMenuVisible(true)
@@ -77,8 +78,8 @@ const RightHeader = () => {
   return (
     <View style={{
       ...styles.container,
-      height: scaleSizeH(HEADER_HEIGHT) + StatusBar.currentHeight,
-      paddingTop: StatusBar.currentHeight,
+      height: scaleSizeH(HEADER_HEIGHT) + statusBarHeight,
+      paddingTop: statusBarHeight,
     }}>
       <View style={styles.left}>
         <TouchableOpacity style={styles.titleBtn} onPress={openMenu}>

@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { ScrollView, View } from 'react-native'
 import NavList from './NavList'
 import Main, { type MainType } from '../Main'
@@ -14,7 +14,7 @@ const styles = createStyle({
   },
   nav: {
     height: '100%',
-    width: '18%',
+    width: '22%',
     borderRightWidth: BorderWidths.normal,
   },
   main: {

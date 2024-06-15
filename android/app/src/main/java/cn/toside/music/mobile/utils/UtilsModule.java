@@ -4,14 +4,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
 import android.view.WindowManager;
 
 import androidx.core.app.LocaleManagerCompat;
@@ -19,15 +24,18 @@ import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.os.LocaleListCompat;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.UiThreadUtil;
 import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.bridge.WritableNativeArray;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -35,14 +43,67 @@ import java.util.Objects;
 public class UtilsModule extends ReactContextBaseJavaModule {
   private final ReactApplicationContext reactContext;
 
+  private int listenerCount = 0;
+
+  UtilsEvent utilsEvent;
+
   UtilsModule(ReactApplicationContext reactContext) {
     super(reactContext);
     this.reactContext = reactContext;
+    utilsEvent = new UtilsEvent(reactContext);
+    registerScreenBroadcastReceiver();
   }
 
   @Override
   public String getName() {
     return "UtilsModule";
+  }
+
+  @ReactMethod
+  public void addListener(String eventName) {
+    if (listenerCount == 0) {
+      // Set up any upstream listeners or background tasks as necessary
+    }
+
+    listenerCount += 1;
+  }
+
+  @ReactMethod
+  public void removeListeners(Integer count) {
+    listenerCount -= count;
+    if (listenerCount == 0) {
+      // Remove upstream listeners, stop unnecessary background tasks
+    }
+  }
+
+  private void registerScreenBroadcastReceiver() {
+    final IntentFilter theFilter = new IntentFilter();
+    /** System Defined Broadcast */
+    theFilter.addAction(Intent.ACTION_SCREEN_ON);
+    theFilter.addAction(Intent.ACTION_SCREEN_OFF);
+
+    BroadcastReceiver screenOnOffReceiver = new BroadcastReceiver() {
+      @Override
+      public void onReceive(Context context, Intent intent) {
+        String strAction = intent.getAction();
+
+        WritableMap params = Arguments.createMap();
+
+        switch (Objects.requireNonNull(strAction)) {
+          case Intent.ACTION_SCREEN_OFF:
+
+            params.putString("state", "OFF");
+            utilsEvent.sendEvent(utilsEvent.SCREEN_STATE, params);
+            break;
+          case Intent.ACTION_SCREEN_ON:
+            params.putString("state", "ON");
+            utilsEvent.sendEvent(utilsEvent.SCREEN_STATE, params);
+            break;
+        }
+      }
+    };
+
+    reactContext.registerReceiver(screenOnOffReceiver, theFilter);
   }
 
   @ReactMethod
@@ -52,6 +113,7 @@ public class UtilsModule extends ReactContextBaseJavaModule {
 
     // https://stackoverflow.com/questions/6330200/how-to-quit-android-application-programmatically
     Activity currentActivity = reactContext.getCurrentActivity();
+    Log.d("Utils", "Exit app...");
     if (currentActivity == null) {
       Log.d("Utils", "killProcess");
       android.os.Process.killProcess(android.os.Process.myPid());
@@ -213,7 +275,7 @@ public class UtilsModule extends ReactContextBaseJavaModule {
 
   // https://blog.51cto.com/u_15298568/3121162
   @ReactMethod
-  public void openNotificationPermissionActivity() {
+  public void openNotificationPermissionActivity(Promise promise) {
     Intent intent = new Intent();
     String packageName = reactContext.getApplicationContext().getPackageName();
 
@@ -226,7 +288,12 @@ public class UtilsModule extends ReactContextBaseJavaModule {
       intent.putExtra("app_uid", reactContext.getApplicationContext().getApplicationInfo().uid);
     }
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    reactContext.startActivity(intent);
+    try {
+      reactContext.startActivity(intent);
+      promise.resolve(true);
+    } catch (Exception ignore) {
+      promise.resolve(false);
+    }
   }
 
   @ReactMethod
@@ -236,26 +303,6 @@ public class UtilsModule extends ReactContextBaseJavaModule {
     shareIntent.putExtra(Intent.EXTRA_TEXT,text);
     shareIntent.putExtra(Intent.EXTRA_SUBJECT, title);
     Objects.requireNonNull(reactContext.getCurrentActivity()).startActivity(Intent.createChooser(shareIntent, shareTitle));
-  }
-
-  @ReactMethod
-  public void getStringFromFile(String filePath, Promise promise) {
-    TaskRunner taskRunner = new TaskRunner();
-    try {
-      taskRunner.executeAsync(new Utils.ReadStringFromFile(filePath), promise::resolve);
-    } catch (RuntimeException err) {
-      promise.reject("-2", err.getMessage());
-    }
-  }
-
-  @ReactMethod
-  public void writeStringToFile(String filePath, String dataStr, Promise promise) {
-    TaskRunner taskRunner = new TaskRunner();
-    try {
-      taskRunner.executeAsync(new Utils.WriteStringToFile(filePath, dataStr), promise::resolve);
-    } catch (RuntimeException err) {
-      promise.reject("-2", err.getMessage());
-    }
   }
 
   // https://stackoverflow.com/questions/73463341/in-per-app-language-how-to-get-app-locale-in-api-33-if-system-locale-is-diffe
@@ -307,5 +354,37 @@ public class UtilsModule extends ReactContextBaseJavaModule {
   //    });
   //  }
 
+  @ReactMethod
+  public void getWindowSize(Promise promise) {
+    WritableMap params = Arguments.createMap();
+
+    Activity currentActivity = reactContext.getCurrentActivity();
+    if (currentActivity == null) {
+      params.putInt("width", 0);
+      params.putInt("height", 0);
+      promise.resolve(params);
+      return;
+    }
+    // 获取当前应用可用区域大小
+    Window window = currentActivity.getWindow();
+    Rect rect = new Rect();
+    window.getDecorView().getWindowVisibleDisplayFrame(rect);
+    // View decorView = window.getDecorView();
+    // int width = decorView.getMeasuredWidth();
+    // int height = decorView.getMeasuredHeight();
+    params.putInt("width", rect.width());
+    params.putInt("height", rect.height());
+    promise.resolve(params);
+  }
+
+  @ReactMethod
+  public void isIgnoringBatteryOptimization(Promise promise) {
+    promise.resolve(BatteryOptimizationUtil.isIgnoringBatteryOptimization(reactContext.getApplicationContext(), reactContext.getPackageName()));
+  }
+
+  @ReactMethod
+  public void requestIgnoreBatteryOptimization(Promise promise) {
+    promise.resolve(BatteryOptimizationUtil.requestIgnoreBatteryOptimization(reactContext.getApplicationContext(), reactContext.getPackageName()));
+  }
 }
 

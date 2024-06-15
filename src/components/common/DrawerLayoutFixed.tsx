@@ -1,4 +1,4 @@
-import React, { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useCallback, useImperativeHandle, useRef, useState } from 'react'
 import { DrawerLayoutAndroid, type DrawerLayoutAndroidProps, View, type LayoutChangeEvent } from 'react-native'
 // import { getWindowSise } from '@/utils/tools'
 import { usePageVisible } from '@/store/common/hook'
@@ -18,7 +18,7 @@ export interface DrawerLayoutFixedType {
 
 const DrawerLayoutFixed = forwardRef<DrawerLayoutFixedType, Props>(({ visibleNavNames, widthPercentage, widthPercentageMax, children, ...props }, ref) => {
   const drawerLayoutRef = useRef<DrawerLayoutAndroid>(null)
-  const [w, setW] = useState<number | string>('100%')
+  const [w, setW] = useState<number | `${number}%`>('100%')
   const [drawerWidth, setDrawerWidth] = useState(0)
   const changedRef = useRef({ width: 0, changed: false })
 

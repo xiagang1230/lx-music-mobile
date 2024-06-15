@@ -1,6 +1,7 @@
 import { httpFetch } from '../../request'
 import { decodeName, dateFormat2 } from '../../index'
 import { signatureParams } from './util'
+import { getMusicInfoRaw } from './musicInfo'
 
 export default {
   _requestObj: null,
@@ -8,9 +9,12 @@ export default {
   async getComment({ hash }, page = 1, limit = 20) {
     if (this._requestObj) this._requestObj.cancelHttp()
 
+    const res_id = (await getMusicInfoRaw(hash)).classification?.[0]?.res_id
+    if (!res_id) throw new Error('获取评论失败')
+
     let timestamp = Date.now()
-    const params = `appid=1005&clienttime=${timestamp}&clienttoken=0&clientver=11409&code=fc4be23b4e972707f36b8a828a93ba8a&dfid=0&extdata=${hash}&kugouid=0&mid=16249512204336365674023395779019&mixsongid=0&p=${page}&pagesize=${limit}&uuid=0&ver=10`
-    const _requestObj = httpFetch(`http://m.comment.service.kugou.com/v1/cmtlist?${params}&signature=${signatureParams(params)}`, {
+    const params = `appid=1005&clienttime=${timestamp}&clienttoken=0&clientver=11409&code=fc4be23b4e972707f36b8a828a93ba8a&dfid=0&extdata=${hash}&kugouid=0&mid=16249512204336365674023395779019&mixsongid=${res_id}&p=${page}&pagesize=${limit}&uuid=0&ver=10`
+    const _requestObj = httpFetch(`http://m.comment.service.kugou.com/r/v1/rank/newest?${params}&signature=${signatureParams(params)}`, {
       cache: 'default',
       headers: {
         'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.24',
@@ -19,7 +23,8 @@ export default {
     const { body, statusCode } = await _requestObj.promise
     // console.log(body)
     if (statusCode != 200 || body.err_code !== 0) throw new Error('获取评论失败')
-    return { source: 'kg', comments: this.filterComment(body.list || []), total: body.count, page, limit, maxPage: body.maxPage }
+    const total = body.count ?? 0
+    return { source: 'kg', comments: this.filterComment(body.list || []), total, page, limit, maxPage: Math.ceil(total / limit) || 1 }
   },
   async getHotComment({ hash }, page = 1, limit = 20) {
     // console.log(songmid)
@@ -36,7 +41,7 @@ export default {
     // console.log(body)
     if (statusCode != 200 || body.err_code !== 0) throw new Error('获取热门评论失败')
     const total = body.count ?? 0
-    return { source: 'kg', comments: this.filterComment(body.list || []), total, page, limit, maxPage: Math.ceil(body.count / limit) || 1 }
+    return { source: 'kg', comments: this.filterComment(body.list || []), total, page, limit, maxPage: Math.ceil(total / limit) || 1 }
   },
   async getReplyComment({ songmid, audioId }, replyId, page = 1, limit = 100) {
     if (this._requestObj2) this._requestObj2.cancelHttp()
@@ -55,11 +60,17 @@ export default {
     if (statusCode != 200 || body.err_code !== 0) throw new Error('获取回复评论失败')
     return { source: 'kg', comments: this.filterComment(body.list || []) }
   },
+  replaceAt(raw, atList) {
+    atList.forEach((atobj) => {
+      raw = raw.replaceAll(`[at=${atobj.id}]`, `@${atobj.name} `)
+    })
+    return raw
+  },
   filterComment(rawList) {
     return rawList.map(item => {
       let data = {
         id: item.id,
-        text: decodeName(item.content || ''),
+        text: decodeName((item.atlist ? this.replaceAt(item.content, item.atlist) : item.content) || ''),
         images: item.images ? item.images.map(i => i.url) : [],
         location: item.location,
         time: item.addtime,

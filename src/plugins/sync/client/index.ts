@@ -1,9 +1,9 @@
 import handleAuth from './auth'
 import { connect as socketConnect, disconnect as socketDisconnect, sendSyncStatus, sendSyncMessage } from './client'
 // import { getSyncHost } from '@/utils/data'
-import { SYNC_CODE } from '@/config/constant'
 import log from '../log'
 import { parseUrl } from './utils'
+import { SYNC_CODE } from '../constants'
 
 let connectId = 0
 
@@ -59,7 +59,7 @@ const disconnectServer = async(isResetStatus = true) => handleDisconnect().then(
   }
 }).catch((err: any) => {
   log.error(`disconnect error: ${err.message as string}`)
-  sendSyncMessage(err.message)
+  sendSyncMessage(err.message as string)
 })
 
 export {

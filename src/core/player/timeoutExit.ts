@@ -17,7 +17,7 @@ const timeoutTools = {
       global.lx.isPlayedStop = true
       this.callHooks()
     } else {
-      exitApp()
+      exitApp('Timeout Exit')
     }
   },
   getTime() {
@@ -32,7 +32,7 @@ const timeoutTools = {
   clearTimeout() {
     if (!this.bgTimeout) return
     BackgroundTimer.clearTimeout(this.bgTimeout)
-    clearInterval(this.timeout as NodeJS.Timer)
+    clearInterval(this.timeout!)
     this.bgTimeout = null
     this.timeout = null
     this.time = -1

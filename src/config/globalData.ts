@@ -1,6 +1,7 @@
 import { version } from '../../package.json'
 import { createAppEventHub } from '@/event/appEvent'
 import { createListEventHub } from '@/event/listEvent'
+import { createDislikeEventHub } from '@/event/dislikeEvent'
 import { createStateEventHub } from '@/event/stateEvent'
 if (process.versions == null) {
   // @ts-expect-error
@@ -44,12 +45,15 @@ global.lx = {
   // syncKeyInfo: {},
 
   isEnableSyncLog: false,
+  isEnableUserApiLog: false,
 
   playerTrackId: '',
 
   gettingUrlId: '',
 
   qualityList: {},
+  apis: {},
+  apiInitPromise: [Promise.resolve(false), true, () => {}],
 
   jumpMyListPosition: false,
 
@@ -71,4 +75,5 @@ global.lx = {
 
 global.app_event = createAppEventHub()
 global.list_event = createListEventHub()
+global.dislike_event = createDislikeEventHub()
 global.state_event = createStateEventHub()

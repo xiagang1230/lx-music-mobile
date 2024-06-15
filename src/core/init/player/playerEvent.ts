@@ -58,7 +58,8 @@ export default () => {
   }
 
   const handleLoadstart = () => {
-    if (global.lx.isPlayedStop) return
+    console.log('handleLoadstart', playerState.isPlay)
+    if (global.lx.isPlayedStop || !playerState.isPlay) return
     startLoadingTimeout()
     setStatusText(global.i18n.t('player__loading'))
   }
@@ -91,7 +92,7 @@ export default () => {
     if (global.lx.isPlayedStop) return
     if (playerState.playMusicInfo.musicInfo && retryNum < 2) { // 若音频URL无效则尝试刷新2次URL
       let musicInfo = playerState.playMusicInfo.musicInfo
-      getPosition().then((position) => {
+      void getPosition().then((position) => {
         if (position) setNowPlayTime(position)
       }).finally(() => {
         // console.log(this.retryNum)

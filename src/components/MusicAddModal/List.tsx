@@ -1,11 +1,11 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { ScrollView, TouchableOpacity, View } from 'react-native'
 
 import Text from '@/components/common/Text'
 import { useMyList } from '@/store/list/hook'
 import ListItem, { styles as listStyles } from './ListItem'
 import CreateUserList from './CreateUserList'
-import { useDimensions } from '@/utils/hooks'
+import { useWindowSize } from '@/utils/hooks'
 import { useTheme } from '@/store/theme/hook'
 import { useI18n } from '@/lang'
 import { createStyle } from '@/utils/tools'
@@ -54,18 +54,18 @@ export default ({ musicInfo, onPress }: {
   musicInfo: LX.Music.MusicInfo
   onPress: (listInfo: LX.List.MyListInfo) => void
 }) => {
-  const { window } = useDimensions()
+  const windowSize = useWindowSize()
   const allList = useMyList()
   const itemWidth = useMemo(() => {
-    let w = Math.floor(window.width * 0.9 - PADDING)
+    let w = Math.floor(windowSize.width * 0.9 - PADDING)
     let n = Math.floor(w / MIN_WIDTH)
     if (n > 10) n = 10
     return Math.floor((w - 1) / n)
-  }, [window])
+  }, [windowSize])
 
   return (
     <ScrollView style={{ flexGrow: 0 }}>
-      <View style={styles.list}>
+      <View style={styles.list} onStartShouldSetResponder={() => true}>
         { allList.map(info => <ListItem key={info.id} listInfo={info} musicInfo={musicInfo} onPress={onPress} width={itemWidth} />) }
         <EditListItem itemWidth={itemWidth} />
       </View>

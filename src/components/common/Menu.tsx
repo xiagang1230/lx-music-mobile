@@ -1,6 +1,6 @@
-import React, { useImperativeHandle, forwardRef, useMemo, useRef, useState, type Ref } from 'react'
+import { useImperativeHandle, forwardRef, useMemo, useRef, useState, type Ref } from 'react'
 import { View, Animated, TouchableHighlight } from 'react-native'
-import { useDimensions } from '@/utils/hooks'
+import { useWindowSize } from '@/utils/hooks'
 
 import Modal, { type ModalType } from './Modal'
 
@@ -66,6 +66,8 @@ const Menu = ({
   buttonPosition,
   menuSize,
   menus,
+  width,
+  height,
   onPress = () => {},
   onHide,
   activeId,
@@ -73,16 +75,16 @@ const Menu = ({
   center = false,
 }: Props) => {
   const theme = useTheme()
-  const { window: windowSize } = useDimensions()
+  const windowSize = useWindowSize()
   // const fadeAnim = useRef(new Animated.Value(0)).current
   // console.log(buttonPosition)
 
   const menuItemStyle = useMemo(() => {
     return {
-      width: menuSize.width ?? menuItemWidth,
-      height: menuSize.height ?? menuItemHeight,
+      width: width ?? menuSize.width ?? menuItemWidth,
+      height: height ?? menuSize.height ?? menuItemHeight,
     }
-  }, [menuSize])
+  }, [menuSize, width, height])
 
   const menuStyle = useMemo(() => {
     let menuHeight = menus.length * menuItemStyle.height
@@ -181,7 +183,7 @@ export interface MenuType {
   hide: () => void
 }
 
-const Component = <M extends Menus>({ menus, activeId, onHide, onPress, fontSize, center }: MenuProps<M>, ref: Ref<MenuType>) => {
+const Component = <M extends Menus>({ menus, width, height, activeId, onHide, onPress, fontSize, center }: MenuProps<M>, ref: Ref<MenuType>) => {
   // console.log(visible)
   const modalRef = useRef<ModalType>(null)
   const [position, setPosition] = useState<Position>({ w: 0, h: 0, x: 0, y: 0 })
@@ -202,7 +204,7 @@ const Component = <M extends Menus>({ menus, activeId, onHide, onPress, fontSize
 
   return (
     <Modal onHide={onHide} ref={modalRef}>
-      <Menu menus={menus} activeId={activeId} buttonPosition={position} menuSize={menuSize} onPress={onPress} onHide={hide} fontSize={fontSize} center={center} />
+      <Menu menus={menus} width={width} height={height} activeId={activeId} buttonPosition={position} menuSize={menuSize} onPress={onPress} onHide={hide} fontSize={fontSize} center={center} />
     </Modal>
   )
 }

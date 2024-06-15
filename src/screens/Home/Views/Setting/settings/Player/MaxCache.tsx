@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react'
+import { memo, useMemo } from 'react'
 import { View } from 'react-native'
 
 import InputItem, { type InputItemProps } from '../../components/InputItem'
@@ -47,7 +47,6 @@ export default memo(() => {
 const styles = createStyle({
   content: {
     marginTop: 10,
-    marginBottom: 15,
   },
 })
 

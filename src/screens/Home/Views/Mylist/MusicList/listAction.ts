@@ -1,11 +1,14 @@
-import { removeListMusics, updateListMusicPosition } from '@/core/list'
-import { playList } from '@/core/player/player'
+import { removeListMusics, updateListMusicPosition, updateListMusics } from '@/core/list'
+import { playList, playNext } from '@/core/player/player'
 import { addTempPlayList } from '@/core/player/tempPlayList'
 import settingState from '@/store/setting/state'
 import { similar, sortInsert } from '@/utils'
-import { confirmDialog, shareMusic } from '@/utils/tools'
+import { confirmDialog, shareMusic, toast } from '@/utils/tools'
+import { addDislikeInfo, hasDislike } from '@/core/dislikeList'
+import playerState from '@/store/player/state'
 
 import type { SelectInfo } from './ListMenu'
+import { type Metadata } from '@/components/MetadataEditModal'
 
 export const handlePlay = (listId: SelectInfo['listId'], index: SelectInfo['index']) => {
   void playList(listId, index)
@@ -44,6 +47,23 @@ export const handleUpdateMusicPosition = (position: number, listId: SelectInfo['
   }
 }
 
+export const handleUpdateMusicInfo = (listId: SelectInfo['listId'], musicInfo: LX.Music.MusicInfoLocal, newInfo: Metadata) => {
+  void updateListMusics([
+    {
+      id: listId,
+      musicInfo: {
+        ...musicInfo,
+        name: newInfo.name,
+        singer: newInfo.singer,
+        meta: {
+          ...musicInfo.meta,
+          albumName: newInfo.albumName,
+        },
+      },
+    },
+  ])
+}
+
 
 export const handleShare = (musicInfo: SelectInfo['musicInfo']) => {
   shareMusic(settingState.setting['common.shareType'], settingState.setting['download.fileName'], musicInfo)
@@ -69,3 +89,17 @@ export const searchListMusic = (list: LX.Music.MusicInfo[], text: string) => {
   return sortedList.map(item => item.data).reverse()
 }
 
+export const handleDislikeMusic = async(musicInfo: SelectInfo['musicInfo']) => {
+  const confirm = await confirmDialog({
+    message: global.i18n.t('lists_dislike_music_tip', { name: musicInfo.name }),
+    cancelButtonText: global.i18n.t('cancel_button_text_2'),
+    confirmButtonText: global.i18n.t('confirm_button_text'),
+    bgClose: false,
+  })
+  if (!confirm) return
+  await addDislikeInfo([{ name: musicInfo.name, singer: musicInfo.singer }])
+  toast(global.i18n.t('lists_dislike_music_add_tip'))
+  if (hasDislike(playerState.playMusicInfo.musicInfo)) {
+    void playNext(true)
+  }
+}

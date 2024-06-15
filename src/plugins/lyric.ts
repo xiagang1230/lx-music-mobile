@@ -35,6 +35,8 @@ const lrcTools = {
   },
   onSetLyric(lines: Lines) {
     this.currentLines = lines
+    this.currentLineData.line = 0
+    this.currentLineData.text = ''
     for (const hook of this.playHooks) hook(-1, '')
     for (const hook of this.setLyricHooks) hook(lines)
   },
@@ -109,6 +111,7 @@ export const useLrcPlay = (autoUpdate = true) => {
     }
     lrcTools.addSetLyricHook(setLrcCallback)
     lrcTools.addPlayHook(playCallback)
+    setLrcInfo(lrcTools.currentLineData)
     return () => {
       lrcTools.removeSetLyricHook(setLrcCallback)
       lrcTools.removePlayHook(playCallback)

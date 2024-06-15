@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { View } from 'react-native'
 import { useTheme } from '@/store/theme/hook'
@@ -17,7 +17,7 @@ import settingState from '@/store/setting/state'
 const MIN_VALUE = 60
 const MAX_VALUE = 200
 
-const Volume = () => {
+export default () => {
   const theme = useTheme()
   const playbackRate = Math.trunc(useSettingValue('player.playbackRate') * 100)
   const [sliderSize, setSliderSize] = useState(playbackRate)
@@ -46,8 +46,8 @@ const Volume = () => {
     setSliderSize(100)
     void setPlaybackRate(1).then(() => {
       void updateMetaData(playerState.musicInfo, playerState.isPlay, true) // 更新通知栏的播放速率
+      void setLyricPlaybackRate(1)
     })
-    void setLyricPlaybackRate(1)
     updateSetting({ 'player.playbackRate': 1 })
   }
 
@@ -71,4 +71,3 @@ const Volume = () => {
   )
 }
 
-export default Volume
